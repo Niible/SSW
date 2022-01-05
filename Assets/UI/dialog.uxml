@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="height: 144px; bottom: auto; justify-content: flex-start; flex-grow: 1; flex-direction: column-reverse;">
+        <ui:VisualElement style="height: 20%; min-height: 150px; max-height: 300px; padding-left: 20px; padding-right: 20px; padding-top: 0; padding-bottom: 20px;">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgb(26, 24, 23); border-top-left-radius: 20px; border-bottom-left-radius: 20px; border-top-right-radius: 20px; border-bottom-right-radius: 20px; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px; text-shadow: 0 0 0 rgb(26, 24, 23);">
+                <ui:Label display-tooltip-when-elided="true" enable-rich-text="true" name="Title" style="-unity-font: url(&apos;project://database/Assets/Pixel%20Font%20-%20Tripfive/Fonts/Tripfive-EX.fontsettings?fileID=12800000&amp;guid=1c10051538e484e849e45b324b9b334b&amp;type=2#Tripfive-EX&apos;); color: rgb(255, 255, 255); position: absolute; width: 100%; top: -35px; left: 20px; bottom: 116px; font-size: 40px; -unity-text-outline-width: 0; -unity-text-outline-color: rgb(26, 24, 23); text-shadow: 0 0 4px rgb(0, 0, 0); -unity-font-style: bold;" />
+                <ui:Label display-tooltip-when-elided="true" name="Details" style="font-size: 20px; color: rgb(255, 255, 255); flex-grow: 1;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

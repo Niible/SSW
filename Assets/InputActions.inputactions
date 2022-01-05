@@ -1,0 +1,45 @@
+{
+    "name": "InputActions",
+    "maps": [
+        {
+            "name": "All",
+            "id": "2ba36387-a151-4c5d-b367-b437fa35e70f",
+            "actions": [
+                {
+                    "name": "SinglePress",
+                    "type": "Button",
+                    "id": "38dd9444-1103-4947-a594-fad1be2274af",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "9bd8106b-b56d-413c-a6e3-cccca8320592",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SinglePress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "afaf45a5-d091-40ce-9de1-df7bc87093a0",
+                    "path": "<Mouse>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SinglePress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
