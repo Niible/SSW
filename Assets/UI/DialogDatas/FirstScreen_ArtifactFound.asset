@@ -16,3 +16,6 @@ MonoBehaviour:
   - What is this?
   details:
   - This... Artifact... Emanes some sort of energy. I wonder what is its use...
+  - I'd better try to get out of here.
+  - (You have gained the Artifact.)
+  formats: 010000000100000000000000

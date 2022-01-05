@@ -6,12 +6,6 @@ public class Hero : MonoBehaviour
     [SerializeField] private float jumpForce = 7.5f;
     [SerializeField] private bool hasArtifact = false;
 
-    public bool HasArtifact
-    {
-        get => hasArtifact;
-        set => hasArtifact = value;
-    }
-
     /**
      * -1 (left), 0 (not moving), 1 (right)
      */
@@ -197,5 +191,13 @@ public class Hero : MonoBehaviour
         _audioManager.PlayCustomSound("Landing");
         // Spawn Dust
         SpawnDustEffect(landingDust);
+    }
+
+    public void SetHasArtifact(bool value)
+    {
+        var uiGameObject = TriggersUI.FindMainUIGameObject();
+        var mainUIComponent = uiGameObject.transform.Find("MainUI").GetComponent<MainUI>();
+        mainUIComponent.SetShouldShowArtifact(value);
+        hasArtifact = value;
     }
 }
