@@ -1,20 +1,39 @@
+using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 public class Dialog : MonoBehaviour
 {
     [SerializeField] public DialogData dialogData;
+    [SerializeField] private bool pauseGameEntirely;
     private UIDocument _uiDocument;
     public Hero hero;
     private int _currentStepIndex;
+    private float _originalTimeScale = 1;
 
     private void OnEnable()
     {
         _currentStepIndex = 0;
         _uiDocument = GetComponent<UIDocument>();
         SetCurrentStep();
-        Time.timeScale = 0;
         hero.isMovementDisabled = true;
+        if (pauseGameEntirely)
+        {
+            StartCoroutine(WaitAndPauseGame());
+        }
+    }
+
+    private IEnumerator WaitAndPauseGame()
+    {
+        while (!hero.IsImmobile() && gameObject.activeSelf)
+        {
+            yield return false;
+        }
+
+        if (!gameObject.activeSelf) yield break;
+        _originalTimeScale = Time.timeScale;
+        Time.timeScale = 0;
     }
 
     /**
@@ -30,7 +49,10 @@ public class Dialog : MonoBehaviour
             title.text = "";
             details.text = "";
             hero.isMovementDisabled = false;
-            Time.timeScale = 1;
+            if (pauseGameEntirely)
+            {
+                Time.timeScale = _originalTimeScale;
+            }
             gameObject.SetActive(false);
             return;
         }
@@ -49,7 +71,7 @@ public class Dialog : MonoBehaviour
         {
             if (format == TextType.Caption)
             {
-                title.text =   "<i>" + dialogData.titles[_currentStepIndex] + "</i>";
+                title.text = "<i>" + dialogData.titles[_currentStepIndex] + "</i>";
                 title.style.opacity = 0.5f;
             }
             else
@@ -62,11 +84,12 @@ public class Dialog : MonoBehaviour
         {
             title.text = "";
         }
+
         if (dialogData.details.Count - 1 >= _currentStepIndex)
         {
             if (format == TextType.Caption)
             {
-                details.text =   "<i>" + dialogData.details[_currentStepIndex] + "</i>";
+                details.text = "<i>" + dialogData.details[_currentStepIndex] + "</i>";
                 details.style.opacity = 0.5f;
             }
             else

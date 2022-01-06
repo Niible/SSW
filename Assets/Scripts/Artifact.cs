@@ -1,7 +1,5 @@
-using System.Linq;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
 
 [RequireComponent(typeof(Collider2D))]
 public class Artifact : Triggerable
@@ -21,7 +19,11 @@ public class Artifact : Triggerable
     protected override void OnTrigger(Hero hero)
     {
         base.OnTrigger(hero);
-        hero.SetHasArtifact(true);
+        hero.SetArtifactModeList(new List<ArtifactMode>()
+        {
+            ArtifactMode.Rest, ArtifactMode.Jump
+        });
+        hero.SetArtifactModeIndex(0);
         _dialogComponent.hero = hero;
         _dialogComponent.dialogData = dialogData;
         _dialogUI.SetActive(true);

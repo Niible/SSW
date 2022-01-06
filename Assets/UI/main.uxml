@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement style="flex-direction: column; flex-grow: 1;">
-        <ui:VisualElement style="flex-direction: row-reverse; height: 10%; min-height: 90px; max-height: 150px; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px;">
-            <ui:IMGUIContainer name="Artifact" style="background-image: url(&apos;project://database/Assets/Pixel%20Art%20-%20Swords%20and%20Staffs/Pack%202/2px/01.png?fileID=2800000&amp;guid=15d8ba1d11ed8c941b9676432344c5c9&amp;type=3#01&apos;); height: 50px; width: 50px; -unity-background-scale-mode: scale-to-fit;" />
+        <ui:VisualElement style="flex-grow: 0; flex-direction: row-reverse;">
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" name="ArtifactModesList" mode="Horizontal" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Hidden" style="flex-grow: 0; flex-direction: row-reverse; min-height: 160px; max-height: 320px; height: 10%; padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

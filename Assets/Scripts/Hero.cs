@@ -1,18 +1,26 @@
+using System.Collections.Generic;
 using UnityEngine;
+
+public enum ArtifactMode
+{
+    None = -1,
+    Rest = 0,
+    Jump,
+}
 
 public class Hero : MonoBehaviour
 {
     [Header("Variables")] [SerializeField] private float maxSpeed = 4.5f;
     [SerializeField] private float jumpForce = 7.5f;
-    [SerializeField] private bool hasArtifact = false;
+    [SerializeField] private int artifactModeIndex = 0;
+    [SerializeField] private List<ArtifactMode> artifactModeList;
 
     /**
      * -1 (left), 0 (not moving), 1 (right)
      */
     [SerializeField] private int currentHorizontalDirection = -1;
 
-    [Header("Effects")]
-    [SerializeField] private GameObject runStopDust;
+    [Header("Effects")] [SerializeField] private GameObject runStopDust;
     [SerializeField] private GameObject jumpDust;
     [SerializeField] private GameObject landingDust;
 
@@ -22,8 +30,10 @@ public class Hero : MonoBehaviour
     private Sensor_Prototype _groundSensor;
     private AudioSource _audioSource;
     private AudioManager _audioManager;
+    private MainUI _mainUIComponent;
     private bool _grounded = false;
     private bool _moving = false;
+    private bool _isInMovementTransition = false;
     private int _facingDirection = 1;
     private float _disableMovementTimer = 0.0f;
     private static readonly int Grounded = Animator.StringToHash("Grounded");
@@ -34,6 +44,8 @@ public class Hero : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        var uiGameObject = TriggersUI.FindMainUIGameObject();
+        _mainUIComponent = uiGameObject.transform.Find("MainUI").GetComponent<MainUI>();
         _animator = GetComponent<Animator>();
         _body2d = GetComponent<Rigidbody2D>();
         _audioSource = GetComponent<AudioSource>();
@@ -92,13 +104,6 @@ public class Hero : MonoBehaviour
         if (_disableMovementTimer <= 0.0f)
             horizontalMovementDirection = currentHorizontalDirection;
 
-        // Check if current move input is greater than very small and the move direction is equal to the characters facing direction
-        if (Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
-            (int) Mathf.Sign(horizontalMovementDirection) == _facingDirection)
-            _moving = true;
-        else
-            _moving = false;
-
         switch (horizontalMovementDirection)
         {
             // Swap direction of sprite depending on move direction
@@ -112,10 +117,45 @@ public class Hero : MonoBehaviour
                 break;
         }
 
-        // SlowDownSpeed helps decelerate the characters when stopping
-        var slowDownSpeed = _moving ? 1.0f : 0.5f;
+        var newVelocity = 0f;
+        // Check if current move input is greater than very small and the move direction is equal to the characters facing direction
+        if (Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
+            (int) Mathf.Sign(horizontalMovementDirection) == _facingDirection && !isMovementDisabled &&
+            // not in Rest mode
+            (artifactModeList.Count == 0 || artifactModeList[artifactModeIndex] != ArtifactMode.Rest))
+        {
+            if (!_moving)
+            {
+                newVelocity = horizontalMovementDirection * maxSpeed * 0.5f;
+                _moving = true;
+                _isInMovementTransition = true;
+            }
+            else
+            {
+                if (_isInMovementTransition)
+                {
+                    _isInMovementTransition = false;
+                }
+
+                newVelocity = horizontalMovementDirection * maxSpeed;
+            }
+        }
+        else
+        {
+            if (_moving)
+            {
+                newVelocity = horizontalMovementDirection * maxSpeed * 0.5f;
+                _moving = false;
+                _isInMovementTransition = true;
+            }
+            else if (_isInMovementTransition)
+            {
+                _isInMovementTransition = false;
+            }
+        }
+
         // Set movement
-        _body2d.velocity = new Vector2(horizontalMovementDirection * maxSpeed * slowDownSpeed, _body2d.velocity.y);
+        _body2d.velocity = new Vector2(newVelocity, _body2d.velocity.y);
 
         // Set AirSpeed in animator
         _animator.SetFloat(AirSpeedY, _body2d.velocity.y);
@@ -126,12 +166,7 @@ public class Hero : MonoBehaviour
         // -- Handle Animations --
 
         //Run
-        if (_moving)
-            _animator.SetInteger(AnimState, 1);
-
-        //Idle
-        else
-            _animator.SetInteger(AnimState, 0);
+        _animator.SetInteger(AnimState, _moving ? 1 : 0);
     }
 
     /**
@@ -139,14 +174,26 @@ public class Hero : MonoBehaviour
      */
     private void OnSinglePress()
     {
-        if (isMovementDisabled || !_grounded) return;
-        
-        //Jump
-        _animator.SetTrigger(Jump);
-        _grounded = false;
-        _animator.SetBool(Grounded, _grounded);
-        _body2d.velocity = new Vector2(_body2d.velocity.x, jumpForce);
-        _groundSensor.Disable(0.2f);
+        if (isMovementDisabled) return;
+
+        HandleArtifactModeChange();
+        _mainUIComponent.RefreshArtifactList(this);
+
+        // //Jump
+        // if !_grounded) return;
+        // _animator.SetTrigger(Jump);
+        // _grounded = false;
+        // _animator.SetBool(Grounded, _grounded);
+        // _body2d.velocity = new Vector2(_body2d.velocity.x, jumpForce);
+        // _groundSensor.Disable(0.2f);
+    }
+
+    private void HandleArtifactModeChange()
+    {
+        if (artifactModeList.Count == 0) return;
+
+        artifactModeIndex = (artifactModeIndex + 1) % artifactModeList.Count;
+        _mainUIComponent.RefreshArtifactList(this);
     }
 
     // Function used to spawn a dust effect
@@ -193,11 +240,30 @@ public class Hero : MonoBehaviour
         SpawnDustEffect(landingDust);
     }
 
-    public void SetHasArtifact(bool value)
+    public int GetArtifactModeIndex()
     {
-        var uiGameObject = TriggersUI.FindMainUIGameObject();
-        var mainUIComponent = uiGameObject.transform.Find("MainUI").GetComponent<MainUI>();
-        mainUIComponent.SetShouldShowArtifact(value);
-        hasArtifact = value;
+        return artifactModeIndex;
+    }
+
+    public List<ArtifactMode> GetArtifactModeList()
+    {
+        return artifactModeList;
+    }
+
+    public void SetArtifactModeIndex(int value)
+    {
+        artifactModeIndex = value;
+        _mainUIComponent.RefreshArtifactList(this);
+    }
+
+    public void SetArtifactModeList(List<ArtifactMode> value)
+    {
+        artifactModeList = value;
+        _mainUIComponent.RefreshArtifactList(this);
+    }
+
+    public bool IsImmobile()
+    {
+        return !_moving && !_isInMovementTransition;
     }
 }

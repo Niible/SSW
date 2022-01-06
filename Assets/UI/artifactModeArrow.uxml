@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="width: 70px; height: 120px; -unity-background-scale-mode: scale-to-fit; background-image: none; padding-left: 15px; padding-right: 15px; padding-top: 10px; padding-bottom: 10px;">
+        <ui:VisualElement name="ArtifactModeArrow" style="width: 100%; height: 100%; -unity-background-scale-mode: scale-to-fit; background-image: none; rotate: 0; opacity: 0.75;" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -2173,7 +2173,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 3
   jumpForce: 7.5
-  hasArtifact: 0
+  artifactModeIndex: 0
+  artifactModeList: 
   currentHorizontalDirection: -1
   runStopDust: {fileID: 7310271610845027193, guid: 39afca3c109b26049a80bc07593eb271, type: 3}
   jumpDust: {fileID: 8935918012585647707, guid: 4a4123fbc8b39d441868897a71d2b2b1, type: 3}
@@ -2504,7 +2505,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d25e5a02b98fef2408f635d5e178a291, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  shouldShowArtifact: 0
+  artifactModeAsset: {fileID: 9197481963319205126, guid: 46befb6415c890942935855150daea91, type: 3}
+  artifactModeArrowAsset: {fileID: 9197481963319205126, guid: fa6cd2032c23c5241ad85e81a81a04b2, type: 3}
+  artifactModeArrowSprite: {fileID: 21300000, guid: 8e03b5c0ada1a304791a97d6addf6cca, type: 2}
 --- !u!1 &1663590331
 GameObject:
   m_ObjectHideFlags: 0

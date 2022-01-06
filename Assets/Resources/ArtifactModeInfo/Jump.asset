@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318b4db60e1981f4bb24e5c6ab340d9d, type: 3}
+  m_Name: Jump
+  m_EditorClassIdentifier: 
+  selectedTexture: {fileID: 2800000, guid: 58d5e666ba9c44c40b3564398800cf0d, type: 3}
+  unselectedTexture: {fileID: 2800000, guid: 6cedd90fa69502f4d85448144e0b38e2, type: 3}
+  artifactMode: 1
