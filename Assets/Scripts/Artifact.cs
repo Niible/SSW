@@ -16,9 +16,9 @@ public class Artifact : Triggerable
         _dialogComponent = _dialogUI.GetComponent<Dialog>();
     }
 
-    protected override void OnTrigger(Hero hero)
+    protected override void OnTrigger(Collider2D other, Hero hero)
     {
-        base.OnTrigger(hero);
+        base.OnTrigger(other, hero);
         hero.SetArtifactModeList(new List<ArtifactMode>()
         {
             ArtifactMode.Rest, ArtifactMode.Jump

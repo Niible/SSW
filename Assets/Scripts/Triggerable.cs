@@ -7,10 +7,10 @@ public class Triggerable : MonoBehaviour
     {
         var hero = other.gameObject.GetComponent<Hero>();
         if (hero == null) return;
-        OnTrigger(hero);
+        OnTrigger(other, hero);
     }
 
-    protected virtual void OnTrigger(Hero hero)
+    protected virtual void OnTrigger(Collider2D other, Hero hero)
     {
     }
 }
