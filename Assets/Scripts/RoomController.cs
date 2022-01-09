@@ -74,7 +74,7 @@ public class RoomController : Triggerable
             colliderHandler.mainCamera = _mainCamera;
         }
     }
-
+    
     private void OnDrawGizmosSelected()
     {
         // Display the bounds

@@ -14,6 +14,7 @@ public class Hero : MonoBehaviour
     [SerializeField] private float jumpForce = 7.5f;
     [SerializeField] private int artifactModeIndex = 0;
     [SerializeField] private List<ArtifactMode> artifactModeList;
+    [SerializeField] public PlayerController playerController;
 
     /**
      * -1 (left), 0 (not moving), 1 (right)
@@ -31,6 +32,7 @@ public class Hero : MonoBehaviour
     private AudioSource _audioSource;
     private AudioManager _audioManager;
     private MainUI _mainUIComponent;
+    private SpriteRenderer _spriteRenderer;
     private bool _grounded = false;
     private bool _moving = false;
     private bool _isInMovementTransition = false;
@@ -46,9 +48,11 @@ public class Hero : MonoBehaviour
     {
         var uiGameObject = TriggersUI.FindMainUIGameObject();
         _mainUIComponent = uiGameObject.transform.Find("MainUI").GetComponent<MainUI>();
+        _mainUIComponent.RefreshArtifactList(this);
         _animator = GetComponent<Animator>();
         _body2d = GetComponent<Rigidbody2D>();
         _audioSource = GetComponent<AudioSource>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
         _audioManager = AudioManager.Instance;
         _groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_Prototype>();
     }
@@ -68,6 +72,8 @@ public class Hero : MonoBehaviour
 
     private void HandleHorizontalDirectionChange(ContactPoint2D contact)
     {
+        if (!_grounded) return;
+
         if (contact.normal == Vector2.left)
         {
             currentHorizontalDirection = -1;
@@ -98,7 +104,11 @@ public class Hero : MonoBehaviour
             _animator.SetBool(Grounded, _grounded);
         }
 
-        // -- Handle movement --
+        HandleHorizontalMovement();
+    }
+
+    private void HandleHorizontalMovement()
+    {
         var horizontalMovementDirection = 0.0f;
 
         if (_disableMovementTimer <= 0.0f)
@@ -108,11 +118,11 @@ public class Hero : MonoBehaviour
         {
             // Swap direction of sprite depending on move direction
             case > 0:
-                GetComponent<SpriteRenderer>().flipX = false;
+                _spriteRenderer.flipX = false;
                 _facingDirection = 1;
                 break;
             case < 0:
-                GetComponent<SpriteRenderer>().flipX = true;
+                _spriteRenderer.flipX = true;
                 _facingDirection = -1;
                 break;
         }
@@ -122,7 +132,7 @@ public class Hero : MonoBehaviour
         if (Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
             (int) Mathf.Sign(horizontalMovementDirection) == _facingDirection && !isMovementDisabled &&
             // not in Rest mode
-            (artifactModeList.Count == 0 || artifactModeList[artifactModeIndex] != ArtifactMode.Rest))
+            (artifactModeList.Count == 0 || artifactModeList[artifactModeIndex] != ArtifactMode.Rest) && _grounded)
         {
             if (!_moving)
             {
@@ -165,7 +175,7 @@ public class Hero : MonoBehaviour
 
         // -- Handle Animations --
 
-        //Run
+        // Run animation
         _animator.SetInteger(AnimState, _moving ? 1 : 0);
     }
 
@@ -180,7 +190,7 @@ public class Hero : MonoBehaviour
         _mainUIComponent.RefreshArtifactList(this);
 
         // //Jump
-        // if !_grounded) return;
+        // if (!_grounded) return;
         // _animator.SetTrigger(Jump);
         // _grounded = false;
         // _animator.SetBool(Grounded, _grounded);
@@ -253,17 +263,29 @@ public class Hero : MonoBehaviour
     public void SetArtifactModeIndex(int value)
     {
         artifactModeIndex = value;
+        if (!_mainUIComponent) return;
         _mainUIComponent.RefreshArtifactList(this);
     }
 
     public void SetArtifactModeList(List<ArtifactMode> value)
     {
         artifactModeList = value;
+        if (!_mainUIComponent) return;
         _mainUIComponent.RefreshArtifactList(this);
     }
 
     public bool IsImmobile()
     {
         return !_moving && !_isInMovementTransition;
+    }
+
+    public void SetLastRespawnPoint(RespawnPoint respawnPoint)
+    {
+        playerController.SetLastRespawnPoint(respawnPoint);
+    }
+
+    public void SetFacingDirection(int facingDirection)
+    {
+        _facingDirection = facingDirection;
     }
 }

@@ -9,29 +9,31 @@ public class RoomController_ColliderController : Triggerable
     protected override void OnTrigger(Collider2D other, Hero hero)
     {
         base.OnTrigger(other, hero);
-        StartCoroutine(LerpFromToPosition(mainCamera.transform.position, cameraPosition.position, 0.9f));
-        StartCoroutine(LerpFromToSize(mainCamera.orthographicSize, cameraPosition.size, 0.9f));
+        StartCoroutine(LerpFromToPosition(mainCamera.transform.position, cameraPosition.position, 0.9f, mainCamera));
+        StartCoroutine(LerpFromToSize(mainCamera.orthographicSize, cameraPosition.size, 0.9f, mainCamera));
     }
 
-    private IEnumerator LerpFromToPosition(Vector3 initialPos, Vector3 newPos, float duration)
+    public static IEnumerator LerpFromToPosition(Vector3 initialPos, Vector3 newPos, float duration, Camera camera)
     {
         for (var t = 0f; t < duration; t += Time.deltaTime)
         {
-            mainCamera.transform.position = Vector3.Lerp(initialPos, newPos, t / duration);
+            camera.transform.position = Vector3.Lerp(initialPos, newPos, t / duration);
             yield return 0;
         }
 
-        transform.position = newPos;
+        camera.transform.position = newPos;
     }
 
-    private IEnumerator LerpFromToSize(float initialSize, float newSize, float duration)
+    public static IEnumerator LerpFromToSize(float initialSize, float newSize, float duration, Camera camera)
     {
         for (var t = 0f; t < duration; t += Time.deltaTime)
         {
-            mainCamera.orthographicSize = Mathf.Lerp(initialSize, newSize, t / duration);
+            camera.orthographicSize = Mathf.Lerp(initialSize, newSize, t / duration);
             yield return 0;
         }
 
-        mainCamera.orthographicSize = newSize;
+        camera.orthographicSize = newSize;
     }
+    
+    
 }
