@@ -11,7 +11,16 @@
                     "id": "38dd9444-1103-4947-a594-fad1be2274af",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Tap",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LongPress",
+                    "type": "Button",
+                    "id": "0a9ab1b3-91f1-43fd-b3b6-0be046ac31c7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(pressPoint=1)",
                     "initialStateCheck": true
                 }
             ],
@@ -35,6 +44,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "SinglePress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "55ca72d5-f552-4af0-b228-6681a58a10e6",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LongPress",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "63ac961c-78f6-41d2-bf19-a9bf608b878b",
+                    "path": "<Mouse>/press",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LongPress",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

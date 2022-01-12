@@ -198,6 +198,11 @@ public class Hero : MonoBehaviour
         // _groundSensor.Disable(0.2f);
     }
 
+    private void OnLongPress()
+    {
+        Debug.Log("Longpress");
+    }
+
     private void HandleArtifactModeChange()
     {
         if (artifactModeList.Count == 0) return;
