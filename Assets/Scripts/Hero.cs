@@ -201,6 +201,7 @@ public class Hero : MonoBehaviour
     private void OnLongPress()
     {
         Debug.Log("Longpress");
+        HandleArtifactModeChange();
     }
 
     private void HandleArtifactModeChange()
