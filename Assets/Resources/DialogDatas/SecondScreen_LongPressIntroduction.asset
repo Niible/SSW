@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea1f3670403a3a34c86317f25bc6c76a, type: 3}
+  m_Name: SecondScreen_LongPressIntroduction
+  m_EditorClassIdentifier: 
+  titles:
+  - 
+  details:
+  - I don't think I will be able to jump on this by myself.
+  - (Small jumps are automatic, but bigger ones are not. Press and hold to use the
+    active jump and climb on this platform.)
+  formats: 0100000000000000

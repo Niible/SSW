@@ -13,6 +13,9 @@ public class Hero : MonoBehaviour
 {
     [Header("Variables")] [SerializeField] private float maxSpeed = 4.5f;
     [SerializeField] private float jumpForce = 7.5f;
+    [SerializeField] private float jumpSpeed = 4.5f;
+    [SerializeField] private float passiveJumpForce = 3.75f;
+    [SerializeField] private float passiveJumpSpeed = 2f;
     [SerializeField] private int artifactModeIndex = 0;
     [SerializeField] private List<ArtifactMode> artifactModeList;
     [SerializeField] public PlayerController playerController;
@@ -154,20 +157,27 @@ public class Hero : MonoBehaviour
                 HandleHorizontalDirectionChange(nextHorizontalMovementCastHits[0]);
             }
             CheckAndHandlePassiveJump(directionForCast);
-            if (!_moving)
+            if (!_grounded)
             {
-                newVelocity = horizontalMovementDirection * maxSpeed * 0.5f;
-                _moving = true;
-                _isInMovementTransition = true;
+                newVelocity = _body2d.velocity.x;
             }
             else
             {
-                if (_isInMovementTransition)
+                if (!_moving)
                 {
-                    _isInMovementTransition = false;
+                    newVelocity = horizontalMovementDirection * maxSpeed * 0.5f;
+                    _moving = true;
+                    _isInMovementTransition = true;
                 }
+                else
+                {
+                    if (_isInMovementTransition)
+                    {
+                        _isInMovementTransition = false;
+                    }
 
-                newVelocity = horizontalMovementDirection * maxSpeed;
+                    newVelocity = horizontalMovementDirection * maxSpeed;
+                }
             }
         }
         else
@@ -209,19 +219,25 @@ public class Hero : MonoBehaviour
         var capsuleBounds = _capsuleCollider2D.bounds;
         var halfCapsuleWidth = capsuleBounds.size.x / 2;
         var capsuleColliderPosition = (Vector2) _capsuleCollider2D.transform.position + Vector2.up * 0.3f;
-        var firstGroundSensorHit = Physics2D.Raycast(capsuleColliderPosition + directionForCast * (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump), Vector2.down, 0.5f);
-        var secondGroundSensorHit = Physics2D.Raycast(capsuleColliderPosition + directionForCast * (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump + maxPassiveJumpDistance), Vector2.down, 0.5f);
+        var firstGroundSensorHits = new RaycastHit2D[2];
+        var secondGroundSensorHits = new RaycastHit2D[2];
         var colliderHits = new RaycastHit2D[2];
         var shouldJumpOverSmallSpace =
-            _capsuleCollider2D.Cast(directionForCast, colliderHits, halfCapsuleWidth + maxPassiveJumpDistance) == 0 &&
-            firstGroundSensorHit.collider == null && secondGroundSensorHit.collider != null;
-        if (firstGroundSensorHit.collider != null)
+            _capsuleCollider2D.Cast(directionForCast, new ContactFilter2D(){useTriggers = false}, colliderHits, halfCapsuleWidth + maxPassiveJumpDistance) == 0 &&
+            Physics2D.Raycast(
+                capsuleColliderPosition + directionForCast * (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump),
+                Vector2.down, new ContactFilter2D { useTriggers = false }, firstGroundSensorHits, 0.5f) == 0 &&
+            Physics2D.Raycast(
+                capsuleColliderPosition + directionForCast *
+                (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump + maxPassiveJumpDistance), Vector2.down,
+                new ContactFilter2D { useTriggers = false }, secondGroundSensorHits, 5f) > 0;
+        if (firstGroundSensorHits.Length > 0)
         {
-            Debug.DrawRay(firstGroundSensorHit.point, firstGroundSensorHit.normal, Color.cyan, 25);
+            Debug.DrawRay(firstGroundSensorHits[0].point, firstGroundSensorHits[0].normal, Color.cyan, 25);
         }
-        if (secondGroundSensorHit.collider != null)
+        if (secondGroundSensorHits.Length > 0)
         {
-            Debug.DrawRay(secondGroundSensorHit.point, secondGroundSensorHit.normal, Color.yellow, 25);
+            Debug.DrawRay(secondGroundSensorHits[0].point, secondGroundSensorHits[0].normal, Color.yellow, 25);
         }
         if (colliderHits.Length > 0)
         {
@@ -229,8 +245,8 @@ public class Hero : MonoBehaviour
         }
 
         if (!shouldJumpOverSmallSpace) return;
-        
-        HandleJump(0.5f * jumpForce);
+
+        HandleJump(passiveJumpForce, passiveJumpSpeed);
     }
     
     private void HandleEndOfMovement() {
@@ -271,15 +287,16 @@ public class Hero : MonoBehaviour
     {
         _isJumping = true;
         yield return new WaitForSeconds(seconds);
-        HandleJump(jumpForce);
+        HandleJump(jumpForce, jumpSpeed);
     }
 
-    private void HandleJump(float jf)
+    private void HandleJump(float jf, float speed)
     {
+        
         _animator.SetTrigger(Jump);
         _grounded = false;
         _animator.SetBool(Grounded, _grounded);
-        _body2d.velocity = new Vector2(currentHorizontalDirection * (maxSpeed * 0.8f), jf);
+        _body2d.velocity = new Vector2(currentHorizontalDirection * speed, jf);
         _groundSensor.Disable(0.2f);
         _shouldJump = false;
         _isJumping = false;
@@ -371,8 +388,14 @@ public class Hero : MonoBehaviour
         playerController.SetLastRespawnPoint(respawnPoint);
     }
 
-    public void SetFacingDirection(int facingDirection)
+    public void SetCurrentHorizontalDirection(int direction)
     {
-        _facingDirection = facingDirection;
+        currentHorizontalDirection = direction;
+    }
+
+    public void SetNotGrounded()
+    {
+        _groundSensor.Disable(0.2f);
+        _grounded = false;
     }
 }

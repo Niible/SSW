@@ -21,11 +21,19 @@ public class Sensor_Prototype : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        if (other.isTrigger)
+        {
+            return;
+        }
         m_ColCount++;
     }
 
     void OnTriggerExit2D(Collider2D other)
     {
+        if (other.isTrigger)
+        {
+            return;
+        }
         m_ColCount--;
     }
 

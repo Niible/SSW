@@ -6,15 +6,13 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Hero player;
-
-    private RespawnPoint _lastRespawnPoint;
-    private GameObject _playerPrefab;
+    [SerializeField] private RespawnPoint lastRespawnPoint;
+    
     private Camera _mainCamera;
 
     private void Start()
     {
         _mainCamera = Camera.main;
-        _playerPrefab = Resources.Load<GameObject>("Prefabs/Player");
         var playerChild = transform.Find("Player");
         if (!playerChild) return;
         player = playerChild.GetComponent<Hero>();
@@ -26,16 +24,18 @@ public class PlayerController : MonoBehaviour
 
     public void SetLastRespawnPoint(RespawnPoint respawnPoint)
     {
-        _lastRespawnPoint = respawnPoint;
+        lastRespawnPoint = respawnPoint;
     }
 
     public void Respawn()
     {
         if (!player) return;
+        player.SetCurrentHorizontalDirection(lastRespawnPoint.facingDirection);
+        player.SetNotGrounded();
+        player.transform.position = lastRespawnPoint.transform.position;
         StartCoroutine(RoomController_ColliderController.LerpFromToPosition(_mainCamera.transform.position,
-            _lastRespawnPoint.cameraPosition.position, 0.9f, _mainCamera));
+            lastRespawnPoint.cameraPosition.position, 0.9f, _mainCamera));
         StartCoroutine(RoomController_ColliderController.LerpFromToSize(_mainCamera.orthographicSize,
-            _lastRespawnPoint.cameraPosition.size, 0.9f, _mainCamera));
-        player.transform.position = _lastRespawnPoint.transform.position;
+            lastRespawnPoint.cameraPosition.size, 0.9f, _mainCamera));
     }
 }
