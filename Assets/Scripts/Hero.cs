@@ -66,28 +66,18 @@ public class Hero : MonoBehaviour
         _groundSensor = groundSensor.GetComponent<Sensor_Prototype>();
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        var contactCount = collision.contactCount;
-        for (var i = 0; i < contactCount; i++)
-        {
-            var contact = collision.GetContact(i);
-            Debug.DrawRay(contact.point, contact.normal, Color.red, 25);
-
-            if (contact.otherCollider.isTrigger) continue;
-            HandleHorizontalDirectionChange(contact);
-        }
-    }
-
-    private void HandleHorizontalDirectionChange(ContactPoint2D contact)
+    private void HandleHorizontalDirectionChange(RaycastHit2D contact)
     {
         if (!_grounded) return;
 
-        if (contact.normal == Vector2.left)
+        // allows +0.5 -0.5 for wall angle
+        // may have to be adjusted later
+        var roundedContactNormalX = Mathf.RoundToInt(contact.normal.x);
+        if (roundedContactNormalX == Mathf.RoundToInt(Vector2.left.x))
         {
             currentHorizontalDirection = -1;
         }
-        else if (contact.normal == Vector2.right)
+        else if (roundedContactNormalX == Mathf.RoundToInt(Vector2.right.x))
         {
             currentHorizontalDirection = 1;
         }
@@ -139,15 +129,14 @@ public class Hero : MonoBehaviour
         var newVelocity = 0f;
 
         var directionForCast = horizontalMovementDirection > 0 ? Vector2.right : Vector2.left;
-        var inAirWallHits = new RaycastHit2D[2];
-        var wouldHitWallInAir = !_grounded &&
-            _capsuleCollider2D.Cast(directionForCast, inAirWallHits, _body2d.velocity.x * Time.deltaTime + 0.1f) > 0;
+        var nextHorizontalMovementCastHits = new RaycastHit2D[2];
+        var nextHorizontalMovementCast =
+            _capsuleCollider2D.Cast(directionForCast, new ContactFilter2D{useTriggers = false}, nextHorizontalMovementCastHits, _body2d.velocity.x * Time.deltaTime + 0.1f);
+        var wouldHitWallInAir = !_grounded && nextHorizontalMovementCast > 0;
         if (wouldHitWallInAir)
         {
-            Debug.DrawRay(inAirWallHits[0].point, inAirWallHits[0].normal, Color.blue);
+            Debug.DrawRay(nextHorizontalMovementCastHits[0].point, nextHorizontalMovementCastHits[0].normal, Color.blue);
         }
-        
-        CheckAndHandlePassiveJump(directionForCast);
         
         // Check if current move input is greater than very small and the move direction is equal to the characters facing direction
         if (!isMovementDisabled && Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
@@ -160,6 +149,11 @@ public class Hero : MonoBehaviour
             !_shouldJump
         )
         {
+            if (nextHorizontalMovementCast > 0)
+            {
+                HandleHorizontalDirectionChange(nextHorizontalMovementCastHits[0]);
+            }
+            CheckAndHandlePassiveJump(directionForCast);
             if (!_moving)
             {
                 newVelocity = horizontalMovementDirection * maxSpeed * 0.5f;

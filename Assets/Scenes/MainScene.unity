@@ -5276,7 +5276,7 @@ Transform:
   m_GameObject: {fileID: 710283878}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -7.6, y: -4.88, z: 0}
-  m_LocalScale: {x: 1, y: 3.375, z: 1}
+  m_LocalScale: {x: 0.325, y: 3.375, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1260673039}
@@ -5294,8 +5294,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cddf7f81e32c4c4fa58354743c0066e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  leftCameraPosition: {fileID: 11400000, guid: 4191df73be3114f4db1f22138a6194ff, type: 2}
-  rightCameraPosition: {fileID: 0}
+  leftCameraPosition: {fileID: 11400000, guid: 67c1b60f83cf734419a531c96d33826c, type: 2}
+  rightCameraPosition: {fileID: 11400000, guid: 4191df73be3114f4db1f22138a6194ff, type: 2}
   topCameraPosition: {fileID: 0}
   bottomCameraPosition: {fileID: 0}
 --- !u!1 &797680219
@@ -6253,11 +6253,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5020924809759615226, guid: c687d55829c19ac42b4cb5fc588aae39, type: 3}
       propertyPath: maxPassiveJumpDistance
-      value: 3
+      value: 2.8
       objectReference: {fileID: 0}
     - target: {fileID: 5020924809759615226, guid: c687d55829c19ac42b4cb5fc588aae39, type: 3}
       propertyPath: currentHorizontalDirection
-      value: 1
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: 5020924809976486304, guid: c687d55829c19ac42b4cb5fc588aae39, type: 3}
       propertyPath: m_LocalPosition.x
