@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +16,9 @@ public class Hero : MonoBehaviour
     [SerializeField] private int artifactModeIndex = 0;
     [SerializeField] private List<ArtifactMode> artifactModeList;
     [SerializeField] public PlayerController playerController;
+    [SerializeField] private float secondsToWaitBeforeJump = 0.2f;
+    [SerializeField] private float maxPassiveJumpDistance = 1f;
+    [SerializeField] private float minCliffDistanceToTriggerPassiveJump = 0.5f;
 
     /**
      * -1 (left), 0 (not moving), 1 (right)
@@ -26,8 +30,11 @@ public class Hero : MonoBehaviour
     [SerializeField] private GameObject landingDust;
 
     public bool isMovementDisabled = false;
+    private bool _shouldJump = false;
+    private bool _isJumping = false;
     private Animator _animator;
     private Rigidbody2D _body2d;
+    private CapsuleCollider2D _capsuleCollider2D;
     private Sensor_Prototype _groundSensor;
     private AudioSource _audioSource;
     private AudioManager _audioManager;
@@ -51,10 +58,12 @@ public class Hero : MonoBehaviour
         _mainUIComponent.RefreshArtifactList(this);
         _animator = GetComponent<Animator>();
         _body2d = GetComponent<Rigidbody2D>();
+        _capsuleCollider2D = GetComponent<CapsuleCollider2D>();
         _audioSource = GetComponent<AudioSource>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _audioManager = AudioManager.Instance;
-        _groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_Prototype>();
+        var groundSensor = transform.Find("GroundSensor");
+        _groundSensor = groundSensor.GetComponent<Sensor_Prototype>();
     }
 
     private void OnCollisionStay2D(Collision2D collision)
@@ -128,11 +137,28 @@ public class Hero : MonoBehaviour
         }
 
         var newVelocity = 0f;
+
+        var directionForCast = horizontalMovementDirection > 0 ? Vector2.right : Vector2.left;
+        var inAirWallHits = new RaycastHit2D[2];
+        var wouldHitWallInAir = !_grounded &&
+            _capsuleCollider2D.Cast(directionForCast, inAirWallHits, _body2d.velocity.x * Time.deltaTime + 0.1f) > 0;
+        if (wouldHitWallInAir)
+        {
+            Debug.DrawRay(inAirWallHits[0].point, inAirWallHits[0].normal, Color.blue);
+        }
+        
+        CheckAndHandlePassiveJump(directionForCast);
+        
         // Check if current move input is greater than very small and the move direction is equal to the characters facing direction
-        if (Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
-            (int) Mathf.Sign(horizontalMovementDirection) == _facingDirection && !isMovementDisabled &&
+        if (!isMovementDisabled && Mathf.Abs(horizontalMovementDirection) > Mathf.Epsilon &&
+            (int) Mathf.Sign(horizontalMovementDirection) == _facingDirection &&
             // not in Rest mode
-            (artifactModeList.Count == 0 || artifactModeList[artifactModeIndex] != ArtifactMode.Rest) && _grounded)
+            (artifactModeList.Count == 0 || artifactModeList[artifactModeIndex] != ArtifactMode.Rest) &&
+            // if hitting wall while in air, stop movement to allow falling
+            (!wouldHitWallInAir) &&
+            // if not jumping
+            !_shouldJump
+        )
         {
             if (!_moving)
             {
@@ -162,6 +188,10 @@ public class Hero : MonoBehaviour
             {
                 _isInMovementTransition = false;
             }
+            else
+            {
+                HandleEndOfMovement();
+            }
         }
 
         // Set movement
@@ -179,6 +209,43 @@ public class Hero : MonoBehaviour
         _animator.SetInteger(AnimState, _moving ? 1 : 0);
     }
 
+    private void CheckAndHandlePassiveJump(Vector2 directionForCast)
+    {
+        if (!_grounded || _isJumping) return;
+        var capsuleBounds = _capsuleCollider2D.bounds;
+        var halfCapsuleWidth = capsuleBounds.size.x / 2;
+        var capsuleColliderPosition = (Vector2) _capsuleCollider2D.transform.position + Vector2.up * 0.3f;
+        var firstGroundSensorHit = Physics2D.Raycast(capsuleColliderPosition + directionForCast * (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump), Vector2.down, 0.5f);
+        var secondGroundSensorHit = Physics2D.Raycast(capsuleColliderPosition + directionForCast * (halfCapsuleWidth + minCliffDistanceToTriggerPassiveJump + maxPassiveJumpDistance), Vector2.down, 0.5f);
+        var colliderHits = new RaycastHit2D[2];
+        var shouldJumpOverSmallSpace =
+            _capsuleCollider2D.Cast(directionForCast, colliderHits, halfCapsuleWidth + maxPassiveJumpDistance) == 0 &&
+            firstGroundSensorHit.collider == null && secondGroundSensorHit.collider != null;
+        if (firstGroundSensorHit.collider != null)
+        {
+            Debug.DrawRay(firstGroundSensorHit.point, firstGroundSensorHit.normal, Color.cyan, 25);
+        }
+        if (secondGroundSensorHit.collider != null)
+        {
+            Debug.DrawRay(secondGroundSensorHit.point, secondGroundSensorHit.normal, Color.yellow, 25);
+        }
+        if (colliderHits.Length > 0)
+        {
+            Debug.DrawRay(colliderHits[0].point, colliderHits[0].normal, Color.green, 25);
+        }
+
+        if (!shouldJumpOverSmallSpace) return;
+        
+        HandleJump(0.5f * jumpForce);
+    }
+    
+    private void HandleEndOfMovement() {
+        if (_shouldJump && !_isJumping)
+        {
+            StartCoroutine(WaitBeforeJump(secondsToWaitBeforeJump));
+        }
+    }
+
     /**
      * On Single Press from Input System
      */
@@ -188,19 +255,40 @@ public class Hero : MonoBehaviour
 
         HandleArtifactModeChange();
         _mainUIComponent.RefreshArtifactList(this);
-
-        // //Jump
-        // if (!_grounded) return;
-        // _animator.SetTrigger(Jump);
-        // _grounded = false;
-        // _animator.SetBool(Grounded, _grounded);
-        // _body2d.velocity = new Vector2(_body2d.velocity.x, jumpForce);
-        // _groundSensor.Disable(0.2f);
     }
 
     private void OnLongPress()
     {
-        Debug.Log("Longpress");
+        if (isMovementDisabled) return;
+        
+        if (artifactModeList.Count == 0) return;
+        var currentArtifactMode = artifactModeList[artifactModeIndex];
+        switch (currentArtifactMode)
+        {
+            case ArtifactMode.Jump:
+                // Jump
+                if (!_grounded) return;
+                _shouldJump = true;
+                break;
+        }
+    }
+
+    private IEnumerator WaitBeforeJump(float seconds)
+    {
+        _isJumping = true;
+        yield return new WaitForSeconds(seconds);
+        HandleJump(jumpForce);
+    }
+
+    private void HandleJump(float jf)
+    {
+        _animator.SetTrigger(Jump);
+        _grounded = false;
+        _animator.SetBool(Grounded, _grounded);
+        _body2d.velocity = new Vector2(currentHorizontalDirection * (maxSpeed * 0.8f), jf);
+        _groundSensor.Disable(0.2f);
+        _shouldJump = false;
+        _isJumping = false;
     }
 
     private void HandleArtifactModeChange()

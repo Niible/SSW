@@ -32,21 +32,10 @@ public class PlayerController : MonoBehaviour
     public void Respawn()
     {
         if (!player) return;
-        var currentArtifactModeList = new List<ArtifactMode>();
-        var playerArtifactModeList = player.GetArtifactModeList();
-        currentArtifactModeList.AddRange(playerArtifactModeList.ToArray());
-        var currentArtifactModeIndex = player.GetArtifactModeIndex();
-        Destroy(player.gameObject);
         StartCoroutine(RoomController_ColliderController.LerpFromToPosition(_mainCamera.transform.position,
             _lastRespawnPoint.cameraPosition.position, 0.9f, _mainCamera));
         StartCoroutine(RoomController_ColliderController.LerpFromToSize(_mainCamera.orthographicSize,
             _lastRespawnPoint.cameraPosition.size, 0.9f, _mainCamera));
-        var newPlayer = Instantiate(_playerPrefab, gameObject.transform, true);
-        newPlayer.transform.position = _lastRespawnPoint.transform.position;
-        player = newPlayer.GetComponent<Hero>();
-        player.SetFacingDirection(_lastRespawnPoint.facingDirection);
-        player.playerController = this;
-        player.SetArtifactModeList(currentArtifactModeList);
-        player.SetArtifactModeIndex(currentArtifactModeIndex);
+        player.transform.position = _lastRespawnPoint.transform.position;
     }
 }
