@@ -63,6 +63,10 @@ public class Projectile : MonoBehaviour
         {
             Destroy(killableComponent.gameObject);
         }
-        Destroy(gameObject);
+
+        if (collider2D.gameObject.GetComponent<Hero>() == null)
+        {
+            Destroy(gameObject);
+        }
     }
 }
