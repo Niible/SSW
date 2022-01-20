@@ -8,6 +8,7 @@ public class Arrow : Triggerable
 {
     public static float shootForce = 20;
     public float destructionTime = 0.5f;
+
     public enum Mode
     {
         Move = 0,
@@ -30,20 +31,18 @@ public class Arrow : Triggerable
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(mode);
         if (mode == Mode.Move)
         {
-            Debug.Log("move");
             //transform.position += transform.forward * shootForce;
             transform.Translate(Vector3.right * shootForce * Time.deltaTime);
         }
 
         if (mode == Mode.Pinned)
         {
+            Debug.Log("pinned");
             _timeToDestruct = Time.time + destructionTime;
             shootForce = 0.0f;
             mode = Mode.WaitToDestruct;
-
         }
 
 
@@ -55,10 +54,7 @@ public class Arrow : Triggerable
 
     protected override void OnTrigger(Collider2D other, Hero hero)
     {
-        if (mode != Mode.Move)
-        {
-            base.OnTrigger(other, hero);
-            hero.playerController.Respawn();
-        }
+        base.OnTrigger(other, hero);
+        hero.playerController.Respawn();
     }
 }
