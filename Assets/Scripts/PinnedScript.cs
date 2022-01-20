@@ -16,6 +16,6 @@ public class PinnedScript : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col)
     {
         Debug.Log("enter");
-        _arrowParent.pinnedOnFloor = true;
+        _arrowParent.mode = Arrow.Mode.Move;
     }
 }
