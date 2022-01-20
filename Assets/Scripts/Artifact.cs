@@ -6,6 +6,8 @@ public class Artifact : Triggerable
     private GameObject _dialogUI;
     private Dialog _dialogComponent;
     [SerializeField] private DialogData dialogData;
+    [SerializeField] private List<ArtifactMode> artifactModes;
+    [SerializeField] private int artifactModeIndex;
 
     // Start is called before the first frame update
     private void Start()
@@ -18,11 +20,10 @@ public class Artifact : Triggerable
     protected override void OnTrigger(Collider2D other, Hero hero)
     {
         base.OnTrigger(other, hero);
-        hero.SetArtifactModeList(new List<ArtifactMode>()
-        {
-            ArtifactMode.Rest, ArtifactMode.Jump
-        });
-        hero.SetArtifactModeIndex(0);
+        var heroArtifactModeList = new List<ArtifactMode>();
+        heroArtifactModeList.AddRange(artifactModes);
+        hero.SetArtifactModeList(heroArtifactModeList);
+        hero.SetArtifactModeIndex(artifactModeIndex);
         _dialogComponent.hero = hero;
         _dialogComponent.dialogData = dialogData;
         _dialogUI.SetActive(true);

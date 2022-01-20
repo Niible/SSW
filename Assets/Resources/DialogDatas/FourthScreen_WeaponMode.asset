@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea1f3670403a3a34c86317f25bc6c76a, type: 3}
+  m_Name: FourthScreen_WeaponMode
+  m_EditorClassIdentifier: 
+  titles:
+  - Oh no...
+  - The path !
+  details:
+  - This scarecrow is weird... I feel like I should destroy it if I want to get out
+    of here alive.
+  - The path is also blocked by this cracked wall.
+  - Hey... It looks like the artifact can fire ! The small projectiles should be
+    enough to kill the scarecrow, but I will have to fire myself to destroy the wall.
+  - (Press and hold to fire a bigger projectile.)
+  formats: 01000000010000000100000000000000

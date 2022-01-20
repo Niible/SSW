@@ -4,20 +4,20 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 
-public class MainUI : MonoBehaviour
+public class MainUI : DynamicTextSizeUI
 {
     [SerializeField] private VisualTreeAsset artifactModeAsset;
     [SerializeField] private VisualTreeAsset artifactModeArrowAsset;
     [SerializeField] private Sprite artifactModeArrowSprite;
     private UIDocument _uiDocument;
     private List<ArtifactModeInfo> _allArtifactModeInfos;
-    private ScrollView _artifactModeScrollView;
+    private VisualElement _artifactModeParentContainer;
     private Texture2D _artifactModeArrow;
 
     private void OnEnable()
     {
         _uiDocument = GetComponent<UIDocument>();
-        _artifactModeScrollView = _uiDocument.rootVisualElement.Q<ScrollView>("ArtifactModesList");
+        _artifactModeParentContainer = _uiDocument.rootVisualElement.Q<VisualElement>("ArtifactModesList");
         _allArtifactModeInfos = new List<ArtifactModeInfo>();
         _allArtifactModeInfos.AddRange(Resources.LoadAll<ArtifactModeInfo>("ArtifactModeInfo"));
         var width = Mathf.RoundToInt(artifactModeArrowSprite.rect.width); 
@@ -40,7 +40,7 @@ public class MainUI : MonoBehaviour
 
     public void RefreshArtifactList(Hero hero)
     {
-        _artifactModeScrollView.Clear();
+        _artifactModeParentContainer.Clear();
 
         var heroArtifactModeList = hero.GetArtifactModeList();
         if (heroArtifactModeList.Count == 0) return;
@@ -55,7 +55,12 @@ public class MainUI : MonoBehaviour
                 var arrowVisualElement = newArrowEntry.Q<VisualElement>("ArtifactModeArrow");
                 arrowVisualElement.style.backgroundImage = _artifactModeArrow;
 
-                _artifactModeScrollView.Add(newArrowEntry);
+                var newArrowEntryChildren = new List<VisualElement>();
+                newArrowEntryChildren.AddRange(newArrowEntry.Children());
+                foreach (var child in newArrowEntryChildren)
+                {
+                    _artifactModeParentContainer.Add(child);
+                }
             }
 
             var newListEntry = artifactModeAsset.Instantiate();
@@ -74,7 +79,12 @@ public class MainUI : MonoBehaviour
                 visualElement.style.opacity = 0.3f;
             }
 
-            _artifactModeScrollView.Add(newListEntry);
+            var newListEntryChildren = new List<VisualElement>();
+            newListEntryChildren.AddRange(newListEntry.Children());
+            foreach (var child in newListEntryChildren)
+            {
+                _artifactModeParentContainer.Add(child);
+            }
         }
     }
 }

@@ -3,9 +3,11 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Dialog : MonoBehaviour
+public class Dialog : DynamicTextSizeUI
 {
     [SerializeField] public DialogData dialogData;
+    [SerializeField] private float titlePercentageSize;
+    [SerializeField] private float detailsPercentageSize;
     [SerializeField] private bool pauseGameEntirely;
     private UIDocument _uiDocument;
     public Hero hero;
@@ -64,6 +66,8 @@ public class Dialog : MonoBehaviour
     {
         var title = _uiDocument.rootVisualElement.Q<Label>("Title");
         var details = _uiDocument.rootVisualElement.Q<Label>("Details");
+        title.parent.RegisterCallback<GeometryChangedEvent>((geometryEvent) => AdaptTitleSize(title, geometryEvent.newRect.height));
+        details.parent.RegisterCallback<GeometryChangedEvent>((geometryEvent) => AdaptDetailsSize(details, geometryEvent.newRect.height));
         var format = dialogData.formats.Count - 1 >= _currentStepIndex
             ? dialogData.formats[_currentStepIndex]
             : TextType.Normal;
@@ -102,5 +106,15 @@ public class Dialog : MonoBehaviour
         {
             details.text = "";
         }
+    }
+
+    private void AdaptTitleSize(Label title, float height)
+    {
+        title.style.fontSize = GetFontSizeFromContainerSize(height, titlePercentageSize);
+    }
+
+    private void AdaptDetailsSize(Label details, float height)
+    {
+        details.style.fontSize = GetFontSizeFromContainerSize(height, detailsPercentageSize);
     }
 }

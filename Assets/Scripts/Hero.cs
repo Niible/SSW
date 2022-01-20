@@ -7,6 +7,7 @@ public enum ArtifactMode
     None = -1,
     Rest = 0,
     Jump,
+    Weapon,
 }
 
 public class Hero : MonoBehaviour
@@ -20,8 +21,11 @@ public class Hero : MonoBehaviour
     [SerializeField] private List<ArtifactMode> artifactModeList;
     [SerializeField] public PlayerController playerController;
     [SerializeField] private float secondsToWaitBeforeJump = 0.2f;
+    [SerializeField] private float secondsToWaitBeforeFire = 0.2f;
     [SerializeField] private float maxPassiveJumpDistance = 1f;
     [SerializeField] private float minCliffDistanceToTriggerPassiveJump = 0.5f;
+    [SerializeField] private float secondsBetweenPassiveProjectiles = 1.5f;
+    [SerializeField] private GameObject projectilePrefab;
 
     /**
      * -1 (left), 0 (not moving), 1 (right)
@@ -35,6 +39,8 @@ public class Hero : MonoBehaviour
     public bool isMovementDisabled = false;
     private bool _shouldJump = false;
     private bool _isJumping = false;
+    private bool _shouldFire = false;
+    private bool _isFiring = false;
     private Animator _animator;
     private Rigidbody2D _body2d;
     private CapsuleCollider2D _capsuleCollider2D;
@@ -52,6 +58,7 @@ public class Hero : MonoBehaviour
     private static readonly int AirSpeedY = Animator.StringToHash("AirSpeedY");
     private static readonly int Jump = Animator.StringToHash("Jump");
     private static readonly int AnimState = Animator.StringToHash("AnimState");
+    private float _secondsToWaitBeforeNextPassiveProjectile = 0.0f;
 
     // Use this for initialization
     private void Start()
@@ -106,6 +113,7 @@ public class Hero : MonoBehaviour
             _animator.SetBool(Grounded, _grounded);
         }
 
+        CheckAndHandlePassiveWeapon();
         HandleHorizontalMovement();
     }
 
@@ -149,7 +157,9 @@ public class Hero : MonoBehaviour
             // if hitting wall while in air, stop movement to allow falling
             (!wouldHitWallInAir) &&
             // if not jumping
-            !_shouldJump
+            !_shouldJump &&
+            // if not firing
+            !_shouldFire
         )
         {
             if (nextHorizontalMovementCast > 0)
@@ -215,7 +225,7 @@ public class Hero : MonoBehaviour
 
     private void CheckAndHandlePassiveJump(Vector2 directionForCast)
     {
-        if (!_grounded || _isJumping) return;
+        if (!_grounded || _isJumping || !IsCurrentArtifactMode(ArtifactMode.Jump)) return;
         var capsuleBounds = _capsuleCollider2D.bounds;
         var halfCapsuleWidth = capsuleBounds.size.x / 2;
         var capsuleColliderPosition = (Vector2) _capsuleCollider2D.transform.position + Vector2.up * 0.3f;
@@ -248,11 +258,44 @@ public class Hero : MonoBehaviour
 
         HandleJump(passiveJumpForce, passiveJumpSpeed);
     }
+
+    private void CheckAndHandlePassiveWeapon()
+    {
+        if (!IsCurrentArtifactMode(ArtifactMode.Weapon)) return;
+        _secondsToWaitBeforeNextPassiveProjectile -= Time.deltaTime;
+
+        if (_secondsToWaitBeforeNextPassiveProjectile > 0) return;
+        if (_secondsToWaitBeforeNextPassiveProjectile < 0) _secondsToWaitBeforeNextPassiveProjectile = 0;
+        HandleFireProjectile(ProjectileSize.Small);
+    }
+
+    private void HandleFireProjectile(ProjectileSize size)
+    {
+        var direction = currentHorizontalDirection == 1 ? Vector2.right : Vector2.left;
+        var newProjectile = Instantiate(projectilePrefab);
+        var newProjectileComponent = newProjectile.AddComponent<Projectile>();
+        newProjectileComponent.size = size;
+        newProjectileComponent.direction = direction;
+        var newProjectilePosition = newProjectile.transform.position;
+        var newProjectileScale = newProjectile.transform.localScale;
+        var scale = size == ProjectileSize.Small ? 0.1f : 0.3f;
+        newProjectile.transform.localScale = new Vector3(scale, scale, newProjectileScale.z);
+        var position = transform.position;
+        newProjectile.transform.position = new Vector3(position.x + _capsuleCollider2D.bounds.size.x / 2 + 0.2f, position.y + _capsuleCollider2D.bounds.size.y / 2 , newProjectilePosition.z);
+        _secondsToWaitBeforeNextPassiveProjectile = secondsBetweenPassiveProjectiles;
+        _shouldFire = false;
+        _isFiring = false;
+    }
     
     private void HandleEndOfMovement() {
         if (_shouldJump && !_isJumping)
         {
             StartCoroutine(WaitBeforeJump(secondsToWaitBeforeJump));
+        }
+        
+        if(_shouldFire && !_isFiring)
+        {
+            StartCoroutine(WaitBeforeFire(secondsToWaitBeforeFire));
         }
     }
 
@@ -280,7 +323,17 @@ public class Hero : MonoBehaviour
                 if (!_grounded) return;
                 _shouldJump = true;
                 break;
+            case ArtifactMode.Weapon:
+                // Jump
+                if (!_grounded) return;
+                _shouldFire = true;
+                break;
         }
+    }
+
+    private bool IsCurrentArtifactMode(ArtifactMode mode)
+    {
+        return artifactModeList.Count > 0 && artifactModeList[artifactModeIndex] == mode;
     }
 
     private IEnumerator WaitBeforeJump(float seconds)
@@ -288,6 +341,13 @@ public class Hero : MonoBehaviour
         _isJumping = true;
         yield return new WaitForSeconds(seconds);
         HandleJump(jumpForce, jumpSpeed);
+    }
+
+    private IEnumerator WaitBeforeFire(float seconds)
+    {
+        _isFiring = true;
+        yield return new WaitForSeconds(seconds);
+        HandleFireProjectile(ProjectileSize.Big);
     }
 
     private void HandleJump(float jf, float speed)

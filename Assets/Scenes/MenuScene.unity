@@ -269,3 +269,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstGameScene: Scenes/MainScene
+  startButtonPercentageSize: 20
+  titlePercentageSize: 30
+  detailsPercentageSize: 14
