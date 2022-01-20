@@ -8,7 +8,7 @@ public class Arrow : Triggerable
 {
 
     public float shootForce = 20;
-    public float destructionTime = 1f;
+    public float destructionTime = 0.5f;
 
     public bool pinnedOnFloor = false;
     private float? _timeToDestruct;
@@ -16,14 +16,14 @@ public class Arrow : Triggerable
     // Start is called before the first frame update
     void Start()
     {
-        _timeToDestruct = Time.time + 3.0f;
+        _timeToDestruct = Time.time + 1.5f;
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        if (shootForce > 0.1f){
+        if (!pinnedOnFloor){
             transform.position += transform.forward * shootForce;
         }
         if (pinnedOnFloor)
